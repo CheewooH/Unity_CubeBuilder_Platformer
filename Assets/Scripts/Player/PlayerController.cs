@@ -1,44 +1,64 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [Header("ÀÌµ¿ ¼³Á¤")]
-    [SerializeField] private float moveSpeed = 5f; // ÀÌµ¿ ¼Óµµ
-    [SerializeField] private float jumpForce = 5f; // Á¡ÇÁ Èû
-    [SerializeField] private LayerMask groundLayer; // ¹Ù´ÚÀ» °¨ÁöÇÒ ·¹ÀÌ¾î ¸¶½ºÅ©
+    [Header("ì´ë™ ì„¤ì •")]
+    [SerializeField] private float moveSpeed = 5f; // ì´ë™ ì†ë„
+    [SerializeField] private float rotationSpeed = 200f; // íšŒì „ ì†ë„
+    [SerializeField] private float jumpForce = 5f; // ì í”„ í˜
+    [SerializeField] private LayerMask groundLayer; // ë°”ë‹¥ ë ˆì´ì–´
+    [SerializeField] private float rayLength = 0.2f; // ë°”ë‹¥ ê°ì§€ ë ˆì´ ê¸¸ì´
 
+    private Animator animator;
     private Rigidbody rb;
-    private Vector3 moveDirection; // ÇÃ·¹ÀÌ¾î ÀÌµ¿ ¹æÇâ
-    private bool isGrounded; // ÇÃ·¹ÀÌ¾î°¡ ¹Ù´Ú¿¡ ºÙ¾îÀÖ´ÂÁö È®ÀÎ
+    private float verticalInput; // ìˆ˜ì§ ì…ë ¥ ê°’ì„ ì €ì¥í•  ë³€ìˆ˜
+    private bool isGrounded; // í”Œë ˆì´ì–´ê°€ ë°”ë‹¥ì— ë¶™ì–´ìˆëŠ”ì§€ í™•ì¸
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
     }
 
     void Update()
     {
-        // ¹æÇâÅ°
-        float horizontalInput = Input.GetAxis("Horizontal"); // A/D ¶Ç´Â ÁÂ¿ì È­»ìÇ¥
-        float verticalInput = Input.GetAxis("Vertical");   // W/S ¶Ç´Â »óÇÏ È­»ìÇ¥
+        // ë°©í–¥í‚¤
+        float horizontalInput = Input.GetAxis("Horizontal"); // íšŒì „
+        verticalInput = Input.GetAxis("Vertical");   // ì´ë™
 
-        moveDirection = transform.right * horizontalInput + transform.forward * verticalInput;
-        moveDirection.Normalize(); // ´ë°¢¼± ÀÌµ¿ ½Ã ¼Óµµ ÀÏÁ¤ÇÏ°Ô À¯Áö
+        // ìºë¦­í„° íšŒì „
+        transform.Rotate(Vector3.up * horizontalInput * rotationSpeed * Time.deltaTime);
 
-        // Á¡ÇÁ
-        if (Input.GetButtonDown("Jump") && isGrounded) // ½ºÆäÀÌ½º¹Ù ÀÔ·Â °¨Áö
+        // ì í”„
+        if (isGrounded)
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            animator.SetBool("IsJump", false); // ë•…ì— ìˆìœ¼ë©´ ì í”„ ìƒíƒœ í•´ì œ
+
+            bool isMoving = Mathf.Abs(verticalInput) > 0.1f; // ì•ë’¤ ì´ë™ ê°ì§€
+            animator.SetBool("IsWalk", isMoving);
+            animator.SetBool("IsIdle", !isMoving);
+
+            // ì í”„ ì…ë ¥ ê°ì§€
+            if (Input.GetButtonDown("Jump")) // ìŠ¤í˜ì´ìŠ¤ë°”
+            {
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                animator.SetBool("IsJump", true);  // ì í”„ ì• ë‹ˆë©”ì´ì…˜ ì‹œì‘
+                animator.SetBool("IsWalk", false); // ì í”„ ì¤‘ì—ëŠ” ê±·ê¸°/ë©ˆì¶¤ ì• ë‹ˆë©”ì´ì…˜ í•´ì œ
+            }
         }
     }
 
     void FixedUpdate()
     {
-        Vector3 targetVelocity = moveDirection * moveSpeed;
-        rb.velocity = new Vector3(targetVelocity.x, rb.velocity.y, targetVelocity.z);
+        // ë°”ë‹¥ ê°ì§€
+        Ray ray = new Ray(transform.position + Vector3.up * 0.1f, Vector3.down);
+        isGrounded = Physics.Raycast(ray, rayLength, groundLayer);
+        Debug.DrawRay(ray.origin, ray.direction * rayLength, Color.red);
 
-        isGrounded = Physics.CheckSphere(transform.position + Vector3.down * 0.9f, 0.2f, groundLayer);
+        // ìºë¦­í„° ì´ë™
+        Vector3 move = transform.forward * verticalInput * moveSpeed;
+        rb.velocity = new Vector3(move.x, rb.velocity.y, move.z);
     }
 }

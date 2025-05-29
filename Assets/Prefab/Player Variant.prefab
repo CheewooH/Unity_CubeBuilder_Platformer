@@ -233,6 +233,11 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 9200417707930478897, guid: 9f0b5713b7412ab4eb37110128bbc164,
+        type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -269,10 +274,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
+  rotationSpeed: 200
   jumpForce: 5
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  rayLength: 0.2
 --- !u!136 &7242481727496955651
 CapsuleCollider:
   m_ObjectHideFlags: 0

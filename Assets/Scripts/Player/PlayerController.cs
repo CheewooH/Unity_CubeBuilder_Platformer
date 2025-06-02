@@ -5,60 +5,67 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [Header("이동 설정")]
-    [SerializeField] private float moveSpeed = 5f; // 이동 속도
-    [SerializeField] private float rotationSpeed = 200f; // 회전 속도
-    [SerializeField] private float jumpForce = 5f; // 점프 힘
-    [SerializeField] private LayerMask groundLayer; // 바닥 레이어
-    [SerializeField] private float rayLength = 0.2f; // 바닥 감지 레이 길이
+    public float moveSpeed = 5f;
+    public float jumpForce = 5f;
+    public LayerMask groundLayer;
 
-    private Animator animator;
+    [Header("마우스 회전 설정")]
+    public float mouseSensitivity = 2f;
+    public Transform cameraPivot; // 카메라 피벗 (상하 회전)
+    public Transform cameraTransform; // 메인 카메라
+
     private Rigidbody rb;
-    private float verticalInput; // 수직 입력 값을 저장할 변수
-    private bool isGrounded; // 플레이어가 바닥에 붙어있는지 확인
+    private Animator animator;
+    private float pitch = 0f;
+    private bool isGrounded;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     void Update()
     {
-        // 방향키
-        float horizontalInput = Input.GetAxis("Horizontal"); // 회전
-        verticalInput = Input.GetAxis("Vertical");   // 이동
+        // 마우스 입력 받아 플레이어 좌우 회전 + 카메라 상하 회전
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
-        // 캐릭터 회전
-        transform.Rotate(Vector3.up * horizontalInput * rotationSpeed * Time.deltaTime);
+        transform.Rotate(0, mouseX, 0); // 좌우는 캐릭터 회전
 
-        // 점프
-        if (isGrounded)
+        pitch -= mouseY;
+        pitch = Mathf.Clamp(pitch, -45f, 70f);
+        cameraPivot.localEulerAngles = new Vector3(pitch, 0, 0);
+
+        // 바닥 체크
+        isGrounded = Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, 0.2f, groundLayer);
+
+        // 점프 입력
+        if (isGrounded && Input.GetButtonDown("Jump"))
         {
-            animator.SetBool("IsJump", false); // 땅에 있으면 점프 상태 해제
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
 
-            bool isMoving = Mathf.Abs(verticalInput) > 0.1f; // 앞뒤 이동 감지
+        // 애니메이션 처리 (선택 사항)
+        Vector2 input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        bool isMoving = input.magnitude > 0.1f;
+        if (animator)
+        {
             animator.SetBool("IsWalk", isMoving);
             animator.SetBool("IsIdle", !isMoving);
-
-            // 점프 입력 감지
-            if (Input.GetButtonDown("Jump")) // 스페이스바
-            {
-                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-                animator.SetBool("IsJump", true);  // 점프 애니메이션 시작
-                animator.SetBool("IsWalk", false); // 점프 중에는 걷기/멈춤 애니메이션 해제
-            }
+            animator.SetBool("IsJump", !isGrounded);
         }
     }
 
     void FixedUpdate()
     {
-        // 바닥 감지
-        Ray ray = new Ray(transform.position + Vector3.up * 0.1f, Vector3.down);
-        isGrounded = Physics.Raycast(ray, rayLength, groundLayer);
-        Debug.DrawRay(ray.origin, ray.direction * rayLength, Color.red);
+        // 입력 방향을 캐릭터 기준으로 변환
+        float h = Input.GetAxis("Horizontal");
+        float v = Input.GetAxis("Vertical");
+        Vector3 inputDir = new Vector3(h, 0, v);
 
-        // 캐릭터 이동
-        Vector3 move = transform.forward * verticalInput * moveSpeed;
+        Vector3 move = transform.TransformDirection(inputDir) * moveSpeed;
         rb.velocity = new Vector3(move.x, rb.velocity.y, move.z);
     }
 }

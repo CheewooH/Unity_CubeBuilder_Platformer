@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CloudCube : MonoBehaviour
+public class TimeCube : MonoBehaviour
 {
     [SerializeField] private float visibleTime = 3f;
     [SerializeField] private float hiddenTime = 3f;

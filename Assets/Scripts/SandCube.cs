@@ -16,6 +16,8 @@ public class SandCube : MonoBehaviour
         if (other.CompareTag(playerTag))
         {
             Rigidbody rb = other.GetComponent<Rigidbody>();
+            PlayerController playerController = other.GetComponent<PlayerController>();
+
             if (rb != null)
             {
                 // 플레이어가 새로 들어오거나 다시 들어오면 부력을 최대로 초기화
@@ -26,6 +28,10 @@ public class SandCube : MonoBehaviour
                 else
                 {
                     playerCurrentbuoyancy[rb] = buoyancy;
+                }
+                if (playerController != null)
+                {
+                    playerController.isInSandCube = true;
                 }
             }
         }
@@ -57,10 +63,16 @@ public class SandCube : MonoBehaviour
         if (other.CompareTag(playerTag))
         {
             Rigidbody rb = other.GetComponent<Rigidbody>();
+            PlayerController playerController = other.GetComponent<PlayerController>();
+
             if (rb != null && playerCurrentbuoyancy.ContainsKey(rb))
             {
                 // 플레이어가 완전히 벗어나면 해당 플레이어 정보 제거
                 playerCurrentbuoyancy.Remove(rb);
+            }
+            if (playerController != null)
+            {
+                playerController.isInSandCube = false;
             }
         }
     }

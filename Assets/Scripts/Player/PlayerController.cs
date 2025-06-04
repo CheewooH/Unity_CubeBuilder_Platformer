@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     private float pitch = 0f;
     private bool isGrounded;
+    public bool isInSandCube = false;
 
     private bool isPlayerMove = false;
     private Vector3 initialPosition; // 플레이어 초기 위치
@@ -52,7 +53,7 @@ public class PlayerController : MonoBehaviour
             isGrounded = Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, 0.2f, groundLayer);
 
             // 점프 입력
-            if (isGrounded && Input.GetButtonDown("Jump"))
+            if ((isGrounded || isInSandCube) && Input.GetButtonDown("Jump"))
             {
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             }
@@ -114,6 +115,7 @@ public class PlayerController : MonoBehaviour
     public void ResetPlayer()
     {
         isPlayerMove = false;
+        isInSandCube = false;
         transform.position = initialPosition;
         transform.rotation = initialRotation;
         rb.velocity = Vector3.zero;

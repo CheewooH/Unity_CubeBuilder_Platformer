@@ -14,6 +14,8 @@ public class GameManager : MonoBehaviour
 
     public UIManager uiManager;
     public PlayerController playerController;
+    public GameObject CM_MainMenuCam;
+    public GameObject CM_PlayerCam;
 
     void Awake()
     {
@@ -41,18 +43,25 @@ public class GameManager : MonoBehaviour
             case GameState.MainMenu:
                 Time.timeScale = 1;
                 playerHasMoved = false;
+                if (CM_MainMenuCam != null) CM_MainMenuCam.SetActive(true); // 메인 메뉴 카메라 켜기
+                if (CM_PlayerCam != null) CM_PlayerCam.SetActive(false); // 플레이 카메라 끄기
+                CM_MainMenuCam.gameObject.SetActive(true);
                 if (uiManager != null) uiManager.ShowMainMenuPanel();
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 break;
             case GameState.Playing:
                 Time.timeScale = 1;
+                if (CM_MainMenuCam != null) CM_MainMenuCam.SetActive(false); // 메인 메뉴 카메라 끄기
+                if (CM_PlayerCam != null) CM_PlayerCam.SetActive(true); // 플레이 카메라 켜기
                 if (uiManager != null) uiManager.ShowGamePanel();
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 break;
             case GameState.GameOver:
                 Time.timeScale = 0;
+                if (CM_MainMenuCam != null) CM_MainMenuCam.SetActive(false); // 메인 메뉴 카메라 끄기
+                if (CM_PlayerCam != null) CM_PlayerCam.SetActive(true); // 플레이 카메라 켜기
                 if (uiManager != null) uiManager.ShowGameOverPanel();
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;

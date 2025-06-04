@@ -71,7 +71,7 @@ PrefabInstance:
     - target: {fileID: 8944393558115053943, guid: 51efd981382df2f49beda5e08094e100,
         type: 3}
       propertyPath: m_IsTrigger
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -100,5 +100,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c7ef3a9a8e8ab9429635287222a6ae8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sinkForce: 5
   playerTag: Player
+  buoyancy: 10
+  buoyancyDecrease: 1
